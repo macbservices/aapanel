@@ -22,14 +22,21 @@ print_title "Atualizando o sistema e instalando dependências..."
 apt-get update -y && apt-get upgrade -y
 apt-get install -y curl wget
 
-# Baixar e instalar o aaPanel
-print_title "Instalando o aaPanel..."
+# Baixar o script de instalação do aaPanel
+print_title "Baixando o script de instalação do aaPanel..."
 URL="https://www.aapanel.com/script/install_7.0_en.sh"
 if [ -f /usr/bin/curl ]; then
     curl -ksSO "$URL"
 else
     wget --no-check-certificate -O install_7.0_en.sh "$URL"
 fi
+
+# Editar o script de instalação para evitar a instalação do nginx
+print_title "Modificando o script para evitar a instalação do Nginx..."
+sed -i 's/apt-get install -y nginx/#apt-get install -y nginx/' install_7.0_en.sh
+
+# Executar o script de instalação do aaPanel
+print_title "Instalando o aaPanel..."
 bash install_7.0_en.sh
 
 # Configurar aaPanel
@@ -37,14 +44,14 @@ print_title "Configurando o aaPanel..."
 if [[ -n "$http_port" && -n "$https_port" ]]; then
     echo "Alterando as portas padrão..."
     # Exemplo fictício para configurar as portas - ajuste conforme necessário
-    sed -i "s/80/$http_port/" /path/to/aapanel/config
-    sed -i "s/443/$https_port/" /path/to/aapanel/config
+    sed -i "s/80/$http_port/" /www/server/panel/data/config.json
+    sed -i "s/443/$https_port/" /www/server/panel/data/config.json
 fi
 
 if [[ -n "$panel_domain" ]]; then
     echo "Configurando domínio: $panel_domain..."
     # Exemplo fictício para configurar o domínio - ajuste conforme necessário
-    echo "domain=$panel_domain" >> /path/to/aapanel/domain_config
+    echo "domain=$panel_domain" > /www/server/panel/data/domain.conf
 fi
 
 # Finalizar instalação
